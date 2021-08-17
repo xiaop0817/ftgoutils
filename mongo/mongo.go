@@ -10,6 +10,7 @@ import (
 )
 
 var Session *mgo.Session
+var prefix = c.C(fmt.Sprintf("%-10s", "[Mongo]"), c.Yellow)
 
 func InitMongo(host string, db string, usrName string, pwd string) {
 	dialInfo := &mgo.DialInfo{
@@ -23,16 +24,17 @@ func InitMongo(host string, db string, usrName string, pwd string) {
 
 	defer func() {
 		if err := recover(); err != nil {
-			fmt.Println(err)
-			fmt.Println(c.C(".............Mongo连接失败..............", c.LightYellow))
+			log.Printf("%s Mongo连接失败[%s]", prefix, c.C(err, c.LightRed))
 			time.Sleep(time.Second * 4)
 		}
 	}()
 
 	s, err := mgo.DialWithInfo(dialInfo)
 	if err != nil {
-		log.Fatalf("Mongo Create Session: %s\n", err)
+		log.Printf("%s Mongo创建连接失败[%s]", prefix, c.C(err, c.LightRed))
+		return
 	}
+	log.Printf("%s %s", prefix, c.C("Mongo创建连接完成!", c.LightGreen))
 	Session = s
 }
 
