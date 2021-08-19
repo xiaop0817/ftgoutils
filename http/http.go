@@ -3,12 +3,25 @@ package http
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"github.com/xiaop0817/ftgoutils/c"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"unsafe"
 )
 
-func PostJson(url string, body interface{}, entity *interface{}, header map[string]string) error {
+var Debug = true
+var prefix = c.C(fmt.Sprintf("%s", "[HTTP]"), c.LightBlue)
+
+func debug(f string, v ...interface{}) {
+	if Debug {
+		log.Printf(f, v...)
+	}
+}
+
+// PostJson POST
+func PostJson(url string, body interface{}, entity interface{}, header map[string]string) error {
 	b, _ := json.Marshal(body)
 	request, _ := http.NewRequest("POST", url, bytes.NewBuffer(b))
 
@@ -30,6 +43,7 @@ func PostJson(url string, body interface{}, entity *interface{}, header map[stri
 	}
 	//byte数组直接转成string，优化内存
 	str := (*string)(unsafe.Pointer(&respBytes))
+	debug("%s %s", prefix, c.C(str, c.LightGreen))
 	err = json.Unmarshal([]byte(*str), entity)
 	return err
 }
