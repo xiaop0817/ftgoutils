@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 	"unsafe"
 )
 
@@ -20,8 +21,8 @@ func debug(f string, v ...interface{}) {
 	}
 }
 
-// PostJson POST
-func PostJson(url string, body interface{}, entity interface{}, header map[string]string) error {
+// PostJson post json body
+func PostJson(url string, body interface{}, result interface{}, header map[string]string) error {
 	b, _ := json.Marshal(body)
 	request, _ := http.NewRequest("POST", url, bytes.NewBuffer(b))
 
@@ -37,6 +38,35 @@ func PostJson(url string, body interface{}, entity interface{}, header map[strin
 	if err != nil {
 		return err
 	}
+	return readBody(result, resp)
+}
+
+//Get get by param
+func Get(url string, param map[string]interface{}, result interface{}) error {
+	paramString := buildParamString(param)
+	resp, err := http.Get(url + paramString)
+	if err != nil {
+		return err
+	}
+	return readBody(result, resp)
+}
+
+// buildParamString tag:构建参数字符串
+func buildParamString(param map[string]interface{}) string {
+	var paramString string
+	var params []string
+	if param != nil {
+		for k, v := range param {
+			params = append(params, k+"="+c.Strval(v))
+		}
+	}
+	if len(params) > 0 {
+		paramString += "?" + strings.Join(params, "&")
+	}
+	return paramString
+}
+
+func readBody(result interface{}, resp *http.Response) error {
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
@@ -44,6 +74,6 @@ func PostJson(url string, body interface{}, entity interface{}, header map[strin
 	//byte数组直接转成string，优化内存
 	str := (*string)(unsafe.Pointer(&respBytes))
 	debug("%s %s", prefix, c.C(str, c.LightGreen))
-	err = json.Unmarshal([]byte(*str), entity)
+	err = json.Unmarshal([]byte(*str), result)
 	return err
 }
