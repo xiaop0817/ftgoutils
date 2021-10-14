@@ -14,8 +14,6 @@ const (
 )
 
 var prefix = c.C(fmt.Sprintf("[%-10s]", "RabbitMQ"), c.LightGreen)
-var Debug = false
-var listeners []HandlerFunc
 
 var MQClient = &Client{
 	connCreated: false,

@@ -21,7 +21,10 @@ func debug(f string, v ...interface{}) {
 	}
 }
 
-// PostJson post json body
+//PostJson Http.Post
+//@param url
+//@Param body 请求body
+//@param result 返回内容
 func PostJson(url string, body interface{}, result interface{}, header map[string]string) error {
 	b, _ := json.Marshal(body)
 	request, _ := http.NewRequest("POST", url, bytes.NewBuffer(b))
@@ -41,10 +44,28 @@ func PostJson(url string, body interface{}, result interface{}, header map[strin
 	return readBody(result, resp)
 }
 
-//Get get by param
+//Get Http.Get
+//@param url
+//@param param 请求参数map
+//@param result 返回内容
 func Get(url string, param map[string]interface{}, result interface{}) error {
 	paramString := buildParamString(param)
 	resp, err := http.Get(url + paramString)
+	if err != nil {
+		return err
+	}
+	return readBody(result, resp)
+}
+
+//Delete Http.Delete
+//@param url
+//@param param 请求参数map
+//@param result 返回内容
+func Delete(url string, param map[string]interface{}, result interface{}) error {
+	paramString := buildParamString(param)
+	request, _ := http.NewRequest("DELETE", url+paramString, nil)
+	client := http.Client{}
+	resp, err := client.Do(request)
 	if err != nil {
 		return err
 	}
